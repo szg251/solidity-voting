@@ -15,11 +15,22 @@ contract Voting {
         owner = msg.sender;
     }
 
-    function addCandidate(Candidate memory newCandidate) public {
+    modifier onlyOwner() {
         require(
             owner == msg.sender,
             "Only contract owner can add new candidates"
         );
+        _;
+    }
+
+    // TODO:
+    //   - we shoould have a voting period, any calls to the vote endpoint should be invalid
+    modifier votingoFinished() {
+        require(candidates.length > 0, "No candidates added yet.");
+        _;
+    }
+
+    function addCandidate(Candidate memory newCandidate) public onlyOwner {
         candidates.push(newCandidate);
     }
 
@@ -28,6 +39,7 @@ contract Voting {
     //   from creating new accounts to gain more votes
     function vote(CandidateId candidateIndex) public {
         require(userVotes[msg.sender] == 0, "A user can only vote once");
+
         userVotes[msg.sender] = 1;
         votes[candidateIndex] += 1;
     }
@@ -38,10 +50,13 @@ contract Voting {
 
     // This function will return the first candidate with the highest vote count
     // TODO:
-    //   - handle tie situations
-    //   - we shoould have a voting period, any calls to the vote endpoint should be invalid
-    function getWinner() public view returns (Candidate memory winner) {
-        require(candidates.length > 0, "No candidates added yet.");
+    //   - handle ties
+    function getWinner()
+        public
+        view
+        votingoFinished
+        returns (Candidate memory winner)
+    {
         uint256 voteCount = 0;
 
         for (uint256 i = 1; i < candidates.length; i++) {
