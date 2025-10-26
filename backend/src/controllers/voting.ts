@@ -1,8 +1,11 @@
 import { Request, Response } from "express";
 import { Address, ContractExecutionError, Web3 } from "web3";
 
+// TODO: There's a way to infer the contract types
 import voting from "../../../out/Voting.sol/Voting.json" with { type: "json" };
 
+// Voting address is hard coded based on the first deployment of the contract with the
+// first private key of anvil
 const votingAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 type AddCandidateReq = {
@@ -12,6 +15,7 @@ type AddCandidateReq = {
 
 type AddCandidateResp = TransactionObject | ContractExecutionError;
 
+// All the data necessary to sign and submit a transaction from the frontend
 type TransactionObject = {
   from: Address;
   to: Address;
@@ -33,6 +37,8 @@ type CandidateWithVotes = {
 };
 
 // Add a candidate
+// This transactions only returns a transaction object, signing and submitting should
+// happen in the end-user's wallet
 export const addCandidate = async (
   req: Request<null, AddCandidateResp, AddCandidateReq>,
   res: Response<AddCandidateResp>,
@@ -111,6 +117,8 @@ type VoteReq = {
 type VoteResp = TransactionObject | ContractExecutionError;
 
 // Cast a vote for a candidate
+// This transactions only returns a transaction object, signing and submitting should
+// happen in the end-user's wallet
 export const vote = async (
   req: Request<null, VoteResp, VoteReq>,
   res: Response<VoteResp>,
