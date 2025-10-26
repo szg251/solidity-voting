@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
-import {Voting, Candidate, CandidateId} from "../contracts/Voting.sol";
+import {Voting, Candidate, CandidateWithVotes, CandidateId} from "../contracts/Voting.sol";
 
 contract VotingTest is Test {
     Voting public voting;
@@ -25,11 +25,11 @@ contract VotingTest is Test {
         expected[0] = candidate1;
         expected[1] = candidate2;
 
-        Candidate[] memory got = voting.getCandidates();
+        CandidateWithVotes[] memory got = voting.getCandidates();
 
         assertEq(got.length, expected.length);
-        assertEq(got[0].name, expected[0].name);
-        assertEq(got[1].name, expected[1].name);
+        assertEq(got[0].candidate.name, expected[0].name);
+        assertEq(got[1].candidate.name, expected[1].name);
     }
 
     function test_vote() public {

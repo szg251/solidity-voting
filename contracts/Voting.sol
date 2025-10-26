@@ -41,8 +41,14 @@ contract Voting {
         votes[candidateIndex] += 1;
     }
 
-    function getCandidates() public view returns (Candidate[] memory) {
-        return candidates;
+    function getCandidates() public view returns (CandidateWithVotes[] memory) {
+        CandidateWithVotes[] memory candidatesWithVotes = new CandidateWithVotes[](candidates.length);
+
+        for (uint256 i = 0; i < candidates.length; i++) {
+            candidatesWithVotes[i] =
+                CandidateWithVotes({candidate: candidates[i], voteCount: votes[CandidateId.wrap(i)]});
+        }
+        return candidatesWithVotes;
     }
 
     // This function will return the first candidate with the highest vote count
@@ -51,7 +57,7 @@ contract Voting {
     function getWinner() public view votingoFinished returns (Candidate memory winner) {
         uint256 voteCount = 0;
 
-        for (uint256 i = 1; i < candidates.length; i++) {
+        for (uint256 i = 0; i < candidates.length; i++) {
             CandidateId candidateId = CandidateId.wrap(i);
             if (votes[candidateId] > voteCount) {
                 voteCount = votes[candidateId];
@@ -67,4 +73,9 @@ struct Candidate {
     string name;
     // Any other data that has to be stored on the chain
     string metadata;
+}
+
+struct CandidateWithVotes {
+    Candidate candidate;
+    uint256 voteCount;
 }
