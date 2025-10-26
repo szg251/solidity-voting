@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
-import {Voting, Candidate, CandidateId} from "../src/Voting.sol";
+import {Voting, Candidate, CandidateId} from "../contracts/Voting.sol";
 
 contract VotingTest is Test {
     Voting public voting;

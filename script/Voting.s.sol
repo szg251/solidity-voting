@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Script} from "forge-std/Script.sol";
-import {Voting} from "../src/Voting.sol";
+import {Voting} from "../contracts/Voting.sol";
 
 contract VotingScript is Script {
     Voting public voting;
