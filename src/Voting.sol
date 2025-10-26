@@ -16,10 +16,7 @@ contract Voting {
     }
 
     modifier onlyOwner() {
-        require(
-            owner == msg.sender,
-            "Only contract owner can add new candidates"
-        );
+        require(owner == msg.sender, "Only contract owner can add new candidates");
         _;
     }
 
@@ -51,12 +48,7 @@ contract Voting {
     // This function will return the first candidate with the highest vote count
     // TODO:
     //   - handle ties
-    function getWinner()
-        public
-        view
-        votingoFinished
-        returns (Candidate memory winner)
-    {
+    function getWinner() public view votingoFinished returns (Candidate memory winner) {
         uint256 voteCount = 0;
 
         for (uint256 i = 1; i < candidates.length; i++) {

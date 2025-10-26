@@ -10,12 +10,9 @@ contract VotingTest is Test {
     address bob = address(0x000001);
     address charlie = address(0x000002);
 
-    Candidate candidate1 =
-        Candidate({name: "George", metadata: "Vote for me!"});
-    Candidate candidate2 =
-        Candidate({name: "Gergely", metadata: "Vote for me instead!"});
-    Candidate candidate3 =
-        Candidate({name: "Alice", metadata: "I'm running too!"});
+    Candidate candidate1 = Candidate({name: "George", metadata: "Vote for me!"});
+    Candidate candidate2 = Candidate({name: "Gergely", metadata: "Vote for me instead!"});
+    Candidate candidate3 = Candidate({name: "Alice", metadata: "I'm running too!"});
 
     function setUp() public {
         voting = new Voting();
