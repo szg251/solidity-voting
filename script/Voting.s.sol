@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Script} from "forge-std/Script.sol";
+import {console} from "forge-std/console.sol";
 import {Voting} from "../contracts/Voting.sol";
 
 contract VotingScript is Script {
@@ -13,6 +14,7 @@ contract VotingScript is Script {
         vm.startBroadcast();
 
         voting = new Voting();
+        console.log("Deployed to ", address(voting));
 
         vm.stopBroadcast();
     }
