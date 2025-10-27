@@ -16,10 +16,7 @@ contract Voting {
     }
 
     modifier onlyOwner() {
-        require(
-            owner == msg.sender,
-            "Only contract owner can add new candidates"
-        );
+        require(owner == msg.sender, "Only contract owner can add new candidates");
         _;
     }
 
@@ -45,16 +42,11 @@ contract Voting {
     }
 
     function getCandidates() public view returns (CandidateWithVotes[] memory) {
-        CandidateWithVotes[]
-            memory candidatesWithVotes = new CandidateWithVotes[](
-                candidates.length
-            );
+        CandidateWithVotes[] memory candidatesWithVotes = new CandidateWithVotes[](candidates.length);
 
         for (uint256 i = 0; i < candidates.length; i++) {
-            candidatesWithVotes[i] = CandidateWithVotes({
-                candidate: candidates[i],
-                voteCount: votes[CandidateId.wrap(i)]
-            });
+            candidatesWithVotes[i] =
+                CandidateWithVotes({candidate: candidates[i], voteCount: votes[CandidateId.wrap(i)]});
         }
         return candidatesWithVotes;
     }
@@ -63,12 +55,7 @@ contract Voting {
     // TODO:
     //   - handle ties
     //   - deal with 0 votes
-    function getWinner()
-        public
-        view
-        votingFinished
-        returns (Candidate memory winner)
-    {
+    function getWinner() public view votingFinished returns (Candidate memory winner) {
         uint256 voteCount = 0;
 
         for (uint256 i = 0; i < candidates.length; i++) {
