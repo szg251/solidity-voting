@@ -9,6 +9,7 @@ import {
 } from "./controllers/voting.ts";
 import { Web3 } from "web3";
 import { parseArgs } from "node:util";
+import { signTransaction, submitTransaction } from "./controllers/testnet.ts";
 
 const app = express();
 
@@ -26,6 +27,9 @@ app.post("/voting/candidates", addCandidate);
 app.get("/voting/candidates", listCandidates);
 app.post("/voting/vote", vote);
 app.get("/voting/winner", getWinner);
+
+app.post("/testnet/sign", signTransaction);
+app.post("/testnet/submit", submitTransaction);
 
 app.listen(8000);
 console.log(`Server is running on http://localhost:8000`);

@@ -3,37 +3,38 @@ import { Address, ContractExecutionError, Web3 } from "web3";
 
 // TODO: There's a way to infer the contract types
 import voting from "../../../out/Voting.sol/Voting.json" with { type: "json" };
+import broadcastLog from "../../../broadcast/Voting.s.sol/31337/run-latest.json" with {
+  type: "json",
+};
 
-// Voting address is hard coded based on the first deployment of the contract with the
-// first private key of anvil
-const votingAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const votingAddress = broadcastLog.transactions[0].contractAddress;
 
-type AddCandidateReq = {
+export type AddCandidateReq = {
   address: Address;
   candidate: Candidate;
 };
 
-type AddCandidateResp = TransactionObject | ContractExecutionError;
+export type AddCandidateResp = TransactionObject | ContractExecutionError;
 
 // All the data necessary to sign and submit a transaction from the frontend
-type TransactionObject = {
+export type TransactionObject = {
   from: Address;
   to: Address;
   data: string;
-  estimatedGas: string;
-  gasPrice: string;
+  maxFeePerGas?: string;
+  maxPriorityFeePerGas?: string;
   nonce: string;
   chainId: string;
 };
 
-type Candidate = {
+export type Candidate = {
   name: string;
   metadata: string;
 };
 
-type CandidateWithVotes = {
+export type CandidateWithVotes = {
   candidate: Candidate;
-  votes: number;
+  voteCount: string;
 };
 
 // Add a candidate
@@ -54,14 +55,15 @@ export const addCandidate = async (
     const contractCall = votingContract.methods.addCandidate(
       req.body.candidate,
     );
+    const feeData = await web3.eth.calculateFeeData();
 
-    res.statusCode = 201;
+    res.statusCode = 200;
     res.send({
       from: req.body.address,
       to: votingAddress,
       data: contractCall.encodeABI(),
-      estimatedGas: (await contractCall.estimateGas()).toString(),
-      gasPrice: (await web3.eth.getGasPrice()).toString(),
+      maxFeePerGas: feeData.maxFeePerGas?.toString(),
+      maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString(),
       nonce: (await web3.eth.getTransactionCount(req.body.address)).toString(),
       chainId: (await web3.eth.getChainId()).toString(),
     });
@@ -71,12 +73,11 @@ export const addCandidate = async (
       res.send(err);
     }
     res.statusCode = 500;
-    console.warn(err);
     res.send();
   }
 };
 
-type ListCandidateResp = {
+export type ListCandidateResp = {
   candidates: CandidateWithVotes[];
 } | ContractExecutionError;
 
@@ -93,11 +94,24 @@ export const listCandidates = async (
       web3,
     );
 
-    const candidates: CandidateWithVotes[] = await votingContract.methods
+    const response: any[] = await votingContract.methods
       .getCandidates().call();
 
+    const candidates = response.map((item) => ({
+      candidate: {
+        name: item.candidate.name,
+        metadata: item.candidate.metadata,
+      },
+      voteCount: item.voteCount.toString(),
+    }));
+
     res.statusCode = 200;
-    res.send({ candidates });
+    res.send({
+      candidates: candidates.map((candidate) => ({
+        candidate: candidate.candidate,
+        voteCount: candidate.voteCount.toString(),
+      })),
+    });
   } catch (err) {
     if (err instanceof ContractExecutionError) {
       res.statusCode = 500;
@@ -109,12 +123,12 @@ export const listCandidates = async (
   }
 };
 
-type VoteReq = {
+export type VoteReq = {
   address: Address;
   candidateId: number;
 };
 
-type VoteResp = TransactionObject | ContractExecutionError;
+export type VoteResp = TransactionObject | ContractExecutionError;
 
 // Cast a vote for a candidate
 // This transactions only returns a transaction object, signing and submitting should
@@ -134,14 +148,15 @@ export const vote = async (
     const contractCall = votingContract.methods.vote(
       req.body.candidateId,
     );
+    const feeData = await web3.eth.calculateFeeData();
 
     res.statusCode = 200;
     res.send({
       from: req.body.address,
       to: votingAddress,
       data: contractCall.encodeABI(),
-      estimatedGas: (await contractCall.estimateGas()).toString(),
-      gasPrice: (await web3.eth.getGasPrice()).toString(),
+      maxFeePerGas: feeData.maxFeePerGas?.toString(),
+      maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString(),
       nonce: (await web3.eth.getTransactionCount(req.body.address)).toString(),
       chainId: (await web3.eth.getChainId()).toString(),
     });
@@ -156,7 +171,7 @@ export const vote = async (
   }
 };
 
-type GetWinnerResp = {
+export type GetWinnerResp = {
   candidate: Candidate;
 } | ContractExecutionError;
 
@@ -173,8 +188,13 @@ export const getWinner = async (
       web3,
     );
 
-    const candidate: Candidate = await votingContract.methods.getWinner()
+    const response: any = await votingContract.methods.getWinner()
       .call();
+
+    const candidate = {
+      name: response.name,
+      metadata: response.metadata,
+    };
 
     res.statusCode = 200;
     res.send({ candidate });
